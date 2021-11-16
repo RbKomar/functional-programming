@@ -48,3 +48,16 @@ let isSorted (tree: Tree): bool =
 let ``exercise 1.3`` = isSorted tree
 (** #### Value of ``exercise 1.3`` *)
 SHOW ``exercise 1.3``
+
+//### Exercise 1.4
+//##Insert element into Binary Search Tree
+let rec insertBST (value: int) (tree: Tree): Tree = 
+    match tree with
+    | Empty ->  Node(value, Empty, Empty)
+    | Node(v, left, right) when v < value -> Node(v, left, insertBST value right)
+    | Node(v, left, right) when v > value -> Node(v, insertBST value left, right)
+    | Node(v, left, right) -> Node(v, left, right)
+
+let ``exercise 1.4`` = insertBST 5 tree |> collectInOrder
+//** #### Value of ``exercise 1.4`` *)
+SHOW ``exercise 1.4``
