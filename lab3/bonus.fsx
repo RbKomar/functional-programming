@@ -61,3 +61,48 @@ let rec insertBST (value: int) (tree: Tree): Tree =
 let ``exercise 1.4`` = insertBST 5 tree |> collectInOrder
 //** #### Value of ``exercise 1.4`` *)
 SHOW ``exercise 1.4``
+
+
+//### New Stuff 2.1
+//#### Modelling cards *)
+type Figure =
+    | Two
+    | Three
+    | Four
+    | Five
+    | Six
+    | Seven
+    | Eight
+    | Nine
+    | Ten
+    | Jack
+    | Queen
+    | King
+    | Ace
+
+type Suit =
+    | Diamonds
+    | Spades
+    | Hearts
+    | Clubs
+
+type Card = Figure * Suit
+type Hand = Card list
+
+//### Exercise 2.1
+//Check if hand is *Flush*
+let handFlush =
+    [ (King, Clubs)
+      (Queen, Clubs)
+      (Nine, Clubs)
+      (Eight, Clubs)
+      (Five, Clubs) ]
+
+let isFlush (hand: Hand): bool = 
+    List.toSeq hand 
+    |> Seq.pairwise
+    |> Seq.forall(fun ((_, suit1), (_, suit2)) -> suit1 = suit2)
+
+let ``exercise 2.1`` = isFlush handFlush
+//** #### Value of ``exercise 2.1`` *)
+SHOW ``exercise 2.1``
