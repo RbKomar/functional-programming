@@ -39,7 +39,7 @@ SHOW ``exercise 1.2``
 let rec isSortedList (l : list<int>) (is_sorted: bool): bool =
     match l with
     | [] | [_] -> true
-    | head::(x::y as tail) -> is_sorted = (head <= x) && isSortedList tail is_sorted
+    | head::(x::y as tail) -> isSortedList tail (head <= x)
 
 let isSorted (tree: Tree): bool = 
     let l = collectInOrder tree
