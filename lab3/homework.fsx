@@ -144,7 +144,23 @@ let sequenceOpts (optionals: 'a option list): 'a list option =
 //##Implement `bowlingScore`.
 
 //###Hint: Use `sequenceOpts` to convert from list of options to option of list
-let bowlingScore (score: string): int option = Some 0
+let GetValue (o: int list option ): int list =
+  if o.IsSome then o.Value
+  else [-1]
+
+let bowlingSc (score: int) =
+
+let bowlingScore (score: string): int option = 
+  let parsedScore = parseScore (Seq.toList score)
+  let flag_calculate = parsedScore |> List.forall(fun x -> x.IsSome) 
+  if flag_calculate then 
+    parsedScore 
+    |> sequenceOpts
+    |> GetValue 
+    |> countScore
+    |> Some
+  else None
+
 
 let ``homework 1`` =
     [ "XXXXXXXXXXXX"
