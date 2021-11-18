@@ -26,6 +26,7 @@ let rec parseScore (chars: char list): int option list =
     match chars with
     | [] -> []
     | x :: tail when x= 'X' -> [Some(10)] @ parseScore tail
+    | '-' :: '/' ::tail  -> [Some(0)] @ [Some(10)] @ parseScore tail
     | '-' :: tail  -> [Some(0)] @ parseScore tail
     | Digit x :: '/' :: tail -> [Some(x)] @ [Some(10-x)] @ parseScore tail
     | Digit x :: tail -> [Some(x)] @ parseScore tail
@@ -51,7 +52,7 @@ let rec countScore (scores: int list): int =
   | 10 :: x :: y :: tail when List.length tail = 0 -> 10 + x + y
   | 10 :: (x :: y :: _ as tail) -> 10 + x + y + countScore tail
   | x :: y :: z ::  tail when x + y = 10 && List.length tail = 0 -> x+y+z 
-  | x :: y :: (z :: _ as tail) when x + y = 10 -> x +  y + z + countScore tail
+  | x :: y :: (z :: _ as tail) when x + y = 10 && x <> 10 && y <> 10 -> x +  y + z + countScore tail
   | x :: tail -> x + countScore tail
 
 let ``exercise 3.2`` =
@@ -148,7 +149,6 @@ let GetValue (o: int list option ): int list =
   if o.IsSome then o.Value
   else [-1]
 
-let bowlingSc (score: int) =
 
 let bowlingScore (score: string): int option = 
   let parsedScore = parseScore (Seq.toList score)
@@ -159,7 +159,8 @@ let bowlingScore (score: string): int option =
     |> GetValue 
     |> countScore
     |> Some
-  else None
+  else 
+    None
 
 
 let ``homework 1`` =
@@ -187,11 +188,41 @@ SHOW ``homework 1``
 //###Write new, **tail-recursive** versions of `parseScore` and `countScore`.
 //###Implement `bowlingScoreTail` to use those 2 new functions
 
-let rec parseScoreTail (chars: char list) (acc: int option list): int option list = []
+let rec parseScoreTail (chars: char list) (acc: int option list): int option list = 
+   match chars with
+    | [] -> acc
+    | x :: tail when x= 'X' ->  parseScoreTail tail (acc @ [Some(10)])
+    | '-' :: '/' ::tail  ->  parseScoreTail tail (acc @ [Some(0)] @ [Some(10)] )
+    | '-' :: tail  -> parseScoreTail tail (acc @ [Some(0)])
+    | Digit x :: '/' :: tail ->  parseScoreTail tail (acc @ [Some(x)] @ [Some(10-x)])
+    | Digit x :: tail ->  parseScoreTail tail (acc @ [Some(x)])
+    | _ :: tail->  parseScoreTail tail (acc @ [None])
 
-let rec countScoreTail (scores: int list) (acc: int): int = 0
+let rec countScoreTail (scores: int list) (acc: int): int = 
+ match scores with
+  | [] -> acc
+  | 10 :: x :: y :: tail when List.length tail = 0 -> acc + 10 + x + y
+  | 10 :: (x :: y :: _ as tail) ->  countScoreTail tail acc + 10 + x + y
+  | x :: y :: z ::  tail when x + y = 10 && List.length tail = 0 -> acc + x+y+z 
+  | x :: y :: (z :: _ as tail) when x + y = 10 && x <> 10 && y <> 10 -> countScoreTail tail acc + x +  y + z 
+  | x :: tail -> countScoreTail tail acc + x
 
-let bowlingScoreTail (score: string): int option = Some 0
+let countScoreTail0acc (scores: int list) = countScoreTail scores 0
+
+let bowlingScoreTail (score: string): int option = 
+  let parsedScoreByTailRecursion = parseScoreTail (Seq.toList score) []
+  let flag_calculate = parsedScoreByTailRecursion |> List.forall(fun x -> x.IsSome) 
+  if flag_calculate then 
+    parsedScoreByTailRecursion 
+    |> sequenceOpts
+    |> GetValue 
+    |> countScoreTail0acc 
+    |> Some
+  else 
+    SHOW parsedScoreByTailRecursion
+    None
+ 
+
 
 let ``homework 2`` =     
     [ "XXXXXXXXXXXX"
@@ -213,8 +244,8 @@ SHOW ``homework 2``
 //   Some 90; Some 111; Some 150; Some 155; Some 187]
 
 //////////////////////////////////////////////////////////////
-/// Indeks:
-/// Imię:
-/// Nazwisko:
+/// Indeks: 
+/// Imię:  
+/// Nazwisko: 
 /// 
 /// Podsumowanie zalizowanych zadan:
