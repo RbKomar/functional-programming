@@ -3,7 +3,33 @@ let SHOW x = printf "%A\n" x
 //##Implement `parseScore`.
 
 //#### --------------- Your code goes below --------------- *)
-let rec parseScore (chars: char list): int option list = []
+let (|Digit|_|) char =
+    let zero = System.Convert.ToInt32 '0'
+    if System.Char.IsDigit char then Some(System.Convert.ToInt32 char - zero) else None
+
+type frame = 
+    | STRIKE of int
+    | SPARE of int
+    | POINTS of int * int
+
+let rec parseScoreToFrame (chars: char list): frame option list = 
+    match chars with
+    | [] -> []
+    | x :: tail when x= 'X' -> [Some(STRIKE 10)] @ parseScoreToFrame tail
+    | '-' :: Digit y :: tail  -> [Some(POINTS (0, y))] @ parseScoreToFrame tail
+    | Digit x :: '/' :: tail -> [Some(SPARE(x))] @ parseScoreToFrame tail
+    | Digit x :: Digit y :: tail -> [Some(POINTS (x,y) )] @ parseScoreToFrame tail
+    | Digit x :: '-' :: tail -> [Some(POINTS (x, 0) )] @ parseScoreToFrame tail
+    | _ :: tail-> [None] @ parseScoreToFrame tail
+    
+let rec parseScore (chars: char list): int option list = 
+    match chars with
+    | [] -> []
+    | x :: tail when x= 'X' -> [Some(10)] @ parseScore tail
+    | '-' :: tail  -> [Some(0)] @ parseScore tail
+    | Digit x :: '/' :: tail -> [Some(x)] @ [Some(10-x)] @ parseScore tail
+    | Digit x :: tail -> [Some(x)] @ parseScore tail
+    | _ :: tail-> [None] @ parseScore tail
 
 let ``exercise 3.1`` =
     parseScore [ 'X'
@@ -19,7 +45,14 @@ SHOW ``exercise 3.1``
 //##Implement `countScore`
 
 //#### --------------- Your code goes below --------------- *)
-let rec countScore (scores: int list): int = 0
+let rec countScore (scores: int list): int = 
+  match scores with
+  | [] -> 0
+  | 10 :: x :: y :: tail when List.length tail = 0 -> 10 + x + y
+  | 10 :: (x :: y :: _ as tail) -> 10 + x + y + countScore tail
+  | x :: y :: z ::  tail when x + y = 10 && List.length tail = 0 -> x+y+z 
+  | x :: y :: (z :: _ as tail) when x + y = 10 -> x +  y + z + countScore tail
+  | x :: tail -> x + countScore tail
 
 let ``exercise 3.2`` =
     [ [ 10
